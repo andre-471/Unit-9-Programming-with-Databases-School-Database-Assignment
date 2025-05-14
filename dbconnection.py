@@ -10,16 +10,17 @@ from mysql.connector.abstracts import MySQLConnectionAbstract
 
 
 class DBConnection:
-    def __init__(self, name):
-        self.connection: MySQLConnectionAbstract = None
+    def __init__(self, database):
+        self.database = database
+        self.connection: MySQLConnectionAbstract | None = None
 
         atexit.register(self.disconnect)
         signal.signal(signal.SIGINT, self.disconnect)
         signal.signal(signal.SIGTERM, self.disconnect)
 
-        self.connect(name)
+        self.connect()
 
-    def connect(self, name):
+    def connect(self):
         if self.connection:
             print("Connection already exists")
             return
@@ -37,7 +38,7 @@ class DBConnection:
                 user=user,
                 password=password,
                 host='10.8.37.226',
-                database=name,
+                database=self.database,
                 autocommit=True,
                 raise_on_warnings=True
             )

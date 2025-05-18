@@ -1,0 +1,11 @@
+[project]
+requires-python = ">= 3.12"
+dependencies = [
+  "mysql-connector-python>=9.2.0",
+  "python-dotenv>=1.1.0",
+  "pyright>=1.1.400",
+]
+readme = "README.md"
+
+[tool.pyright]
+typeCheckingMode = "strict"

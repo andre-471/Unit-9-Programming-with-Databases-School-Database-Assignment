@@ -1,5 +1,4 @@
 from enum import IntEnum
-from collections.abc import Callable
 from typing import Protocol
 
 from dbconnection import DBConnection
@@ -10,48 +9,41 @@ class UserTypes(IntEnum):
     TEACHER = 2
 
 
-class GetsInput(Protocol):
-    def __call__(self, has_error: bool) -> str: ...
+class ConvertsType[T](Protocol):
+    def __call__(self, string_input: str) -> tuple[bool, T | None]: ...
 
 
-class ChecksSuccess[T](Protocol):
-    def __call__(self, user_input: str) -> (bool, T | None): ...
+def input_until_success[T](input_message: str, error_message: str, convert_type: ConvertsType[T]) -> T:
+    user_input: str = input(input_message).strip()
+    successful, formatted_input = convert_type(user_input)
+
+    while not successful or formatted_input is None:
+        print(error_message)
+        user_input: str = input(input_message).strip()
+        successful, formatted_input = convert_type(user_input)
+
+    return formatted_input
 
 
 class Jupiter:
-    def __init__(self, database) -> None:
-        self.connection: DBConnection = DBConnection(database)
+    def __init__(self, database: str) -> None:
+        # self.connection: DBConnection = DBConnection(database)
         self.user_type: UserTypes | None = None
 
     def login(self):
         print("Are you a student or a teacher?")
         print("1: Student")
         print("2: Teacher")
-        user_type: str = input("Enter choice: ").strip()
-        user_type: int | None = int(user_type) if user_type.isdigit() else None
 
-        while user_type not in UserTypes:
-            print("Invalid choice!")
-            user_type: str = input("Enter choice: ").strip()
-            user_type: int | None = int(user_type) if user_type.isdigit() else None
-
-        self.user_type: UserTypes = UserTypes(user_type)
+        self.user_type = input_until_success(
+            "Enter choice: ",
+            "Invalid choice!",
+            lambda string_input: (True, UserTypes(integer_input))
+            if string_input.isdigit() and (integer_input := int(string_input)) in UserTypes
+            else (False, None)
+        )
 
         if self.user_type is UserTypes.STUDENT:
             pass
         else:
             pass
-
-    def _input_until_success[T](self, get_input: GetsInput,
-                                if_success: ChecksSuccess[T]) -> T:
-        user_input: str = get_input(False)
-
-        successful: bool
-        formatted_input: T | None
-        successful, formatted_input = if_success(user_input)
-
-        while not successful:
-            user_input: str = get_input(True)
-            successful, formatted_input = if_success(user_input)
-
-        return formatted_input

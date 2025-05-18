@@ -2,11 +2,13 @@ import atexit
 import os
 import sys
 import signal
+from typing import Any
 
 import mysql.connector
 from dotenv import load_dotenv, find_dotenv
 from mysql.connector import errorcode
 from mysql.connector.abstracts import MySQLConnectionAbstract
+from mysql.connector.pooling import MySQLConnectionPool
 
 
 class DBConnection:
@@ -60,7 +62,7 @@ class DBConnection:
         else:
             print("No connection to close")
 
-    def query(self, query, params=None) -> list[tuple]:
+    def query(self, query: str, params: dict[str, int]=None) -> list[tuple[Any, ...]]:
         with self.connection.cursor() as cursor:
             cursor.execute(query, params)
 

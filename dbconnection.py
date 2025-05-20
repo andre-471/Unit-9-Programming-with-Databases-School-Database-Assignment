@@ -62,7 +62,7 @@ class DBConnection:
         else:
             print("No connection to close")
 
-    def query(self, query: str, params: dict[str, int]=None) -> list[tuple[Any, ...]]:
+    def query(self, query: str, params: dict[str, int] = None) -> list[tuple[Any, ...]]:
         with self.connection.cursor() as cursor:
             cursor.execute(query, params)
 

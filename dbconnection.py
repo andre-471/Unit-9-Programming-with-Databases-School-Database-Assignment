@@ -2,27 +2,28 @@ import atexit
 import os
 import sys
 import signal
-from typing import Any
+from typing import Sequence
 
 import mysql.connector
 from dotenv import load_dotenv, find_dotenv
 from mysql.connector import errorcode
 from mysql.connector.abstracts import MySQLConnectionAbstract
-from mysql.connector.pooling import MySQLConnectionPool
+from mysql.connector.pooling import PooledMySQLConnection
+from mysql.connector.types import MySQLConvertibleType, RowType, RowItemType
 
 
 class DBConnection:
-    def __init__(self, database):
-        self.database = database
-        self.connection: MySQLConnectionAbstract | None = None
+    def __init__(self, database: str):
+        self.database: str = database
+        self.connection: PooledMySQLConnection | MySQLConnectionAbstract | None = None
 
         atexit.register(self.disconnect)
-        signal.signal(signal.SIGINT, self.disconnect)
-        signal.signal(signal.SIGTERM, self.disconnect)
+        signal.signal(signal.SIGINT, self.disconnect)  # pyright: ignore [reportArgumentType]
+        signal.signal(signal.SIGTERM, self.disconnect)  # pyright: ignore [reportArgumentType]
 
         self.connect()
 
-    def connect(self):
+    def connect(self) -> None:
         if self.connection:
             print("Connection already exists")
             return
@@ -54,7 +55,7 @@ class DBConnection:
 
             sys.exit(1)
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         if self.connection:
             self.connection.close()
             self.connection = None
@@ -62,8 +63,16 @@ class DBConnection:
         else:
             print("No connection to close")
 
-    def query(self, query: str, params: dict[str, int] = None) -> list[tuple[Any, ...]]:
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, params)
-
-            return cursor.fetchall()
+    def query(self, query: str,
+              params: Sequence[MySQLConvertibleType] | dict[str, MySQLConvertibleType] | None = None) -> (
+            list[RowType | dict[str, RowItemType]] | None):
+        
+        if self.connection:
+            with self.connection.cursor() as cursor:
+                if params:
+                    cursor.execute(query, params)
+                else:
+                    cursor.execute(query)
+    
+                return cursor.fetchall()
+        return None

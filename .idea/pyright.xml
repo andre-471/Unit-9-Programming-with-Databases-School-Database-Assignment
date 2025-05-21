@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="com.insyncwithfoo.pyright.configurations.Local">
-    <option name="runningMode" value="LSP" />
+    <option name="diagnosticMode" value="WORKSPACE" />
+    <option name="languageServerExecutable" value="C:\Users\andre\PycharmProjects\Unit-9-Programming-with-Databases-School-Database-Assignment\.venv\Scripts\pyright-langserver.exe" />
+    <option name="logLevel" value="TRACE" />
+    <option name="prefixTooltipMessages" value="true" />
+    <option name="smartExecutableResolution" value="true" />
+    <option name="smartLanguageServerExecutableResolution" value="true" />
   </component>
 </project>

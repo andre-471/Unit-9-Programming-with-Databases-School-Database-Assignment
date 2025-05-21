@@ -10,14 +10,18 @@ class UserTypes(IntEnum):
 
 
 class Success[T](Protocol):
-    def __call__(self, string_input: str, **kwargs) -> tuple[bool, T | None]: ...
+    """
+    A callable that takes a string input and returns a tuple of a boolean indicating success or failure.
+    """
+    def __call__(self, string_input: str) -> tuple[bool, T | None]: ...
 
 
 class Jupiter:
     def __init__(self, database: str) -> None:
-        # self.connection: DBConnection = DBConnection(database)
+        self.connection: DBConnection = DBConnection(database)
         self.user_type: UserTypes | None = None
         self.user_id: int | None = None
+        self.successes: Successes = Successes(self)
 
     @staticmethod
     def __input_until_success[T](input_message: str, error_message: str, success: Success[T]) -> T:
@@ -39,30 +43,48 @@ class Jupiter:
         self.user_type = self.__input_until_success(
             "Enter choice: ",
             "Invalid choice!",
-            self.Successes.until_valid_usertype,
+            self.successes.usertype_success,
         )
 
-        if self.user_type is UserTypes.STUDENT:
-            self.user_id = self.__input_until_success(
-                "Enter id: "
-                "Invalid id!"
-            )
+        self.user_id = self.__input_until_success(
+            "Enter id: ",
+            "Invalid id!",
+            self.successes.id_success,
+        )
+
+
+class Successes:
+    def __init__(self, jupiter: Jupiter):
+        self.jupiter = jupiter
+
+    @staticmethod
+    def usertype_success(string_input: str) -> tuple[bool, UserTypes | None]:
+        if not string_input.isdigit():
+            return False, None
+
+        integer_input: int = int(string_input)
+
+        if integer_input not in UserTypes:
+            return False, None
+
+        return True, UserTypes(integer_input)
+
+    def id_success(self, string_input: str) -> tuple[bool, int | None]:
+        if self.jupiter.user_id is None:
+            return False, None
+        
+        if self.jupiter.user_type not in UserTypes:
+            return False, None
+        
+        if self.jupiter.user_type is UserTypes.STUDENT:
+            query = "SELECT id FROM students WHERE id = %s"
         else:
-            pass
+            query = "SELECT id FROM teachers WHERE id = %s"
 
-    class Successes:
-        @staticmethod
-        def until_valid_usertype(string_input: str, **kwargs) -> tuple[bool, UserTypes | None]:
-            if not string_input.isdigit():
-                return False, None
-
-            integer_input: int = int(string_input)
-
-            if integer_input not in UserTypes:
-                return False, None
-
-            return True, UserTypes(integer_input)
-
-        @staticmethod
-        def until_valid_id(string_input: str, **kwargs) -> tuple[bool, int | None]:
-            if kwargs["user_type"] is
+        result = self.jupiter.connection.query(query, (string_input,))
+        
+        if result is None:
+            return False, None
+        
+        return True, result[0][0]
+            

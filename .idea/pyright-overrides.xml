@@ -5,6 +5,9 @@
       <map>
         <entry key="autoSearchPaths" value="true" />
         <entry key="diagnosticMode" value="true" />
+        <entry key="logLevel" value="true" />
+        <entry key="prefixTooltipMessages" value="true" />
+        <entry key="runningMode" value="true" />
         <entry key="targetedFileExtensions" value="true" />
         <entry key="workspaceFolders" value="true" />
       </map>

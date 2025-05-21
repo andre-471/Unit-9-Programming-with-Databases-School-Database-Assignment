@@ -7,6 +7,7 @@ from dbconnection import DBConnection
 class UserTypes(IntEnum):
     STUDENT = 1
     TEACHER = 2
+    ADMINISTRATOR = 3
 
 
 class Success[T](Protocol):
@@ -39,6 +40,7 @@ class Jupiter:
         print("Are you a student or a teacher?")
         print("1: Student")
         print("2: Teacher")
+        print("3: Teacher")
 
         self.user_type = self.__input_until_success(
             "Enter choice: ",
